@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<style id="cg-hide-cursor">*{cursor:none!important}</style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Land Loan Calculator -Land Pro System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css?v=12">
+<!-- FONTAWESOME FOR ICONS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+body { padding-top: 90px; }
+
+/* ── Hamburger override ── */
+.hamburger { display: flex; flex-direction: column; justify-content: center; gap: 5px; background: none; border: none; cursor: pointer; padding: 6px; z-index: 1100; }
+.hamburger span { display: block; width: 24px; height: 2px; background: var(--accent-gold); border-radius: 2px; transition: all 0.3s; }
+.mobile-menu { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10,15,30,0.97); backdrop-filter: blur(12px); z-index: 1050; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.mobile-menu.open { display: flex; }
+.mobile-menu a { color: #f1f5f9; font-size: 1.5rem; font-weight: 700; text-decoration: none; letter-spacing: 1px; transition: color 0.2s; }
+.mobile-menu a:hover, .mobile-menu a.active { color: var(--accent-gold); }
+.mobile-menu .close-menu { position: absolute; top: 28px; right: 28px; background: none; border: none; color: var(--accent-gold); font-size: 2rem; cursor: pointer; }
+
+/* ── Page Layout ── */
+.loan-page { max-width: 900px; margin: 0 auto; padding: 0 20px 60px; }
+.page-header { text-align: center; margin-bottom: 48px; }
+.page-header h1 { font-size: 2.4rem; font-weight: 800; color: var(--accent-gold); text-shadow: 0 0 20px rgba(212,175,55,0.3); margin-bottom: 12px; }
+.page-header p { color: var(--text-muted); font-size: 1.05rem; max-width: 560px; margin: 0 auto; }
+
+/* ── Loan Card ── */
+.loan-card {
+  background: rgba(17,24,39,0.9);
+  border: 1px solid rgba(212,175,55,0.2);
+  border-radius: 20px;
+  padding: 36px;
+  box-shadow: 0 12px 50px rgba(0,0,0,0.5);
+  position: relative;
+  overflow: hidden;
+}
+.loan-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #d4af37, #f0c040, #d4af37);
+}
+
+/* ── Form Grid ── */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 28px; }
+.form-group label { display: block; color: var(--text-muted); font-size: 13px; font-weight: 500; margin-bottom: 8px; }
+.form-group input {
+  width: 100%;
+  padding: 13px 16px;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(212,175,55,0.2);
+  border-radius: 10px;
+  color: #f1f5f9;
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  box-sizing: border-box;
+}
+.form-group input:focus {
+  outline: none;
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 0 3px rgba(212,175,55,0.15);
+}
+
+/* ── Tenure Selector ── */
+.tenure-section { margin-bottom: 28px; }
+.tenure-section label { color: var(--text-muted); font-size: 13px; font-weight: 500; margin-bottom: 10px; display: block; }
+.tenure-pills { display: flex; gap: 10px; }
+.tenure-pill {
+  flex: 1;
+  padding: 11px;
+  border: 2px solid rgba(212,175,55,0.25);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.tenure-pill.active, .tenure-pill:hover {
+  border-color: var(--accent-gold);
+  background: rgba(212,175,55,0.12);
+  color: var(--accent-gold);
+}
+
+/* ── Results Grid ── */
+.results-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  background: rgba(0,0,0,0.35);
+  padding: 22px;
+  border-radius: 14px;
+  border: 1px solid rgba(212,175,55,0.1);
+  margin-bottom: 28px;
+}
+.result-item .label { color: var(--text-muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+.result-item .value { color: #f1f5f9; font-size: 16px; font-weight: 700; }
+.result-item.highlight .value { color: var(--accent-gold); font-size: 20px; }
+
+/* ── Bank Row ── */
+.bank-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.bank-logos { display: flex; align-items: center; gap: 10px; }
+.bank-logos span { color: var(--text-muted); font-size: 12px; }
+
+.apply-btn {
+  background: linear-gradient(135deg, var(--accent-gold), #f0c040);
+  color: #0a0f1e;
+  border: none;
+  padding: 14px 36px;
+  border-radius: 10px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 800;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 6px 20px rgba(212,175,55,0.4);
+}
+.apply-btn:hover { transform: translateY(-2px); filter: brightness(1.08); box-shadow: 0 10px 30px rgba(212,175,55,0.5); }
+.apply-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+/* ── Info Cards ── */
+.info-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 36px; }
+.info-card {
+  background: rgba(17,24,39,0.8);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 14px;
+  padding: 22px;
+  text-align: center;
+}
+.info-card .icon { font-size: 2rem; margin-bottom: 10px; }
+.info-card h4 { color: var(--accent-gold); font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+.info-card p { color: var(--text-muted); font-size: 12px; line-height: 1.6; }
+
+@media (max-width: 700px) {
+  .form-grid { grid-template-columns: 1fr; }
+  .results-grid { grid-template-columns: 1fr 1fr; }
+  .info-cards { grid-template-columns: 1fr; }
+  .tenure-pills { flex-wrap: wrap; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="container">
+    <div class="logo">Land Pro System</div>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="index.html#properties">Properties</a></li>
+      <li><a href="index.html#map-section">Map</a></li>
+      <li><a href="price-prediction.html">AI Prediction</a></li>
+      <li><a href="loan.html">Loan</a></li>
+      <li id="navDashboard" style="display:none;"><a href="index.html#dashboard">Dashboard</a></li>
+      <li id="navAdmin" style="display:none;"><a href="index.html#admin">Admin</a></li>
+      <li id="navProfile" style="display:none;"><a href="index.html#profile">Account Profile</a></li>
+      <li id="navAuth"><a href="index.html#auth">Login</a></li>
+      <li id="navLogout" style="display:none;">
+        <span id="userGreeting"></span>
+        <a href="#" onclick="handleLogout(); return false;" class="logout-btn">Logout</a>
+      </li>
+    </ul>
+    <button class="hamburger" onclick="toggleMenu()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <button class="close-menu" onclick="toggleMenu()">✕</button>
+  <h3 style="color: var(--accent-gold); margin-bottom: 20px; font-size: 1.8rem; letter-spacing: 2px;">NAVIGATION</h3>
+  <a href="index.html" onclick="toggleMenu()">Home</a>
+  <a href="index.html#map-section" onclick="toggleMenu()">Map</a>
+  <a href="price-prediction.html" onclick="toggleMenu()">AI Prediction</a>
+  <a href="loan.html" class="active" onclick="toggleMenu()">Loan</a>
+</div>
+
+<div class="loan-page">
+
+  <div class="page-header">
+    <h1> Land Loan Calculator</h1>
+    <p>Calculate your EMI, check loan eligibility, and apply with our trusted banking partners instantly.</p>
+  </div>
+
+  <!-- MAIN LOAN CARD -->
+  <div class="loan-card">
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Land Price / Property Value (₹)</label>
+        <input type="number" id="landPrice" placeholder="e.g. 5000000" min="0" oninput="calculateEMI()">
+      </div>
+      <div class="form-group">
+        <label>Down Payment (₹)</label>
+        <input type="number" id="downPayment" placeholder="Min 20% of price" min="0" oninput="calculateEMI()">
+      </div>
+      <div class="form-group">
+        <label>Interest Rate (% per annum)</label>
+        <input type="number" id="interestRate" placeholder="e.g. 8.5" step="0.1" min="1" max="30" value="8.5" oninput="calculateEMI()">
+      </div>
+    </div>
+
+    <!-- TENURE PILLS -->
+    <div class="tenure-section">
+      <label>Loan Tenure</label>
+      <div class="tenure-pills">
+        <button class="tenure-pill" onclick="setTenure(this, 5)">5 Years</button>
+        <button class="tenure-pill" onclick="setTenure(this, 10)">10 Years</button>
+        <button class="tenure-pill active" onclick="setTenure(this, 15)">15 Years</button>
+        <button class="tenure-pill" onclick="setTenure(this, 20)">20 Years</button>
+        <button class="tenure-pill" onclick="setTenure(this, 30)">30 Years</button>
+      </div>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="results-grid">
+      <div class="result-item highlight">
+        <div class="label">Monthly EMI</div>
+        <div class="value" id="emiDisplay">₹0</div>
+      </div>
+      <div class="result-item">
+        <div class="label">Loan Amount</div>
+        <div class="value" id="principalDisplay">₹0</div>
+      </div>
+      <div class="result-item">
+        <div class="label">Total Interest</div>
+        <div class="value" id="interestDisplay">₹0</div>
+      </div>
+      <div class="result-item">
+        <div class="label">Total Payment</div>
+        <div class="value" id="totalDisplay">₹0</div>
+      </div>
+    </div>
+
+    <!-- BANK ROW -->
+    <div class="bank-row">
+      <div class="bank-logos">
+        <span>Banking Partners:</span>
+        <img src="/images/hdfc-logo.svg" alt="HDFC" style="height:22px; opacity:0.85; filter:drop-shadow(0 0 4px rgba(255,255,255,0.5));">
+        <img src="/images/axis-logo.svg" alt="Axis" style="height:22px; opacity:0.85; filter:drop-shadow(0 0 4px rgba(255,255,255,0.5));">
+        <div style="background:white; padding:2px 6px; border-radius:4px; font-weight:900; color:#7f0022; font-size:12px; font-family:sans-serif;">IDFC FIRST</div>
+      </div>
+      <button class="apply-btn" id="applyBtn" onclick="applyLoan()">Apply for Loan</button>
+    </div>
+
+  </div>
+
+  <!-- INFO CARDS -->
+  <div class="info-cards">
+    <div class="info-card">
+      <div class="icon"></div>
+      <h4>Easy Application</h4>
+      <p>Submit your loan application online in minutes. Our banking partners review within 24 hours.</p>
+    </div>
+    <div class="info-card">
+      <div class="icon"></div>
+      <h4>Secure & Safe</h4>
+      <p>Your data is encrypted and never shared without consent. Bank-grade security protocols.</p>
+    </div>
+    <div class="info-card">
+      <div class="icon"></div>
+      <h4>Quick Approval</h4>
+      <p>Get in-principle approval in 48 hours. Minimal documentation for existing customers.</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+let selectedTenure = 15;
+
+function fmtInr(n) {
+  return '₹' + Math.round(n).toLocaleString('en-IN');
+}
+
+function setTenure(btn, years) {
+  document.querySelectorAll('.tenure-pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedTenure = years;
+  calculateEMI();
+}
+
+function calculateEMI() {
+  const price    = parseFloat(document.getElementById('landPrice').value) || 0;
+  const down     = parseFloat(document.getElementById('downPayment').value) || 0;
+  const rate     = parseFloat(document.getElementById('interestRate').value) || 8.5;
+  const n        = selectedTenure * 12;
+  let principal  = price - down;
+  if (principal < 0) principal = 0;
+
+  const r   = (rate / 12) / 100;
+  let emi = 0, total = 0, interest = 0;
+  if (principal > 0 && r > 0) {
+    const pow = Math.pow(1 + r, n);
+    emi       = principal * r * pow / (pow - 1);
+    total     = emi * n;
+    interest  = total - principal;
+  } else if (principal > 0) {
+    emi = principal / n;
+    total = principal;
+  }
+
+  document.getElementById('emiDisplay').textContent      = fmtInr(emi);
+  document.getElementById('principalDisplay').textContent = fmtInr(principal);
+  document.getElementById('interestDisplay').textContent  = fmtInr(interest);
+  document.getElementById('totalDisplay').textContent     = fmtInr(total);
+  return { principal, emi, interest, total };
+}
+
+async function applyLoan() {
+  const calc = calculateEMI();
+  if (calc.principal <= 0) {
+    alert('Please enter a valid Land Price and Down Payment first.');
+    return;
+  }
+  let userId = 1;
+  try { const u = JSON.parse(localStorage.getItem('user')); if (u && u.userId) userId = u.userId; } catch(e) {}
+
+  const btn = document.getElementById('applyBtn');
+  btn.textContent = 'Submitting...'; btn.disabled = true;
+
+  const payload = {
+    userId,
+    principalAmount: Math.round(calc.principal),
+    interestRate: parseFloat(document.getElementById('interestRate').value) || 8.5,
+    tenureYears: selectedTenure,
+    downPayment: Math.round(parseFloat(document.getElementById('downPayment').value) || 0),
+    monthlyEMI: Math.round(calc.emi),
+    totalInterest: Math.round(calc.interest),
+    totalPayment: Math.round(calc.total)
+  };
+
+  try {
+    const res  = await fetch('/api/loan/apply', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    const data = await res.json();
+    if (res.ok) {
+      alert(' ' + data.message + '\nA banking partner will contact you shortly.');
+      btn.textContent = 'Application Submitted ✓';
+      btn.style.background = 'linear-gradient(135deg,#10b981,#059669)';
+      btn.style.color = 'white';
+    } else {
+      alert(' ' + (data.message || 'Application failed.'));
+      btn.textContent = 'Apply for Loan'; btn.disabled = false;
+    }
+  } catch(e) {
+    alert(' Network error. Please try again.');
+    btn.textContent = 'Apply for Loan'; btn.disabled = false;
+  }
+}
+
+function toggleMenu() {
+  document.getElementById('mobileMenu').classList.toggle('open');
+}
+
+// Set default down payment hint when price changes
+document.getElementById('landPrice').addEventListener('input', function() {
+  const price = parseFloat(this.value) || 0;
+  const downEl = document.getElementById('downPayment');
+  if (!downEl.value && price > 0) {
+    downEl.placeholder = 'Min ₹' + Math.round(price * 0.2).toLocaleString('en-IN') + ' (20%)';
+  }
+});
+
+calculateEMI();
+</script>
+
+<script src="js/cursor-effect.js"></script>
+</body>
+</html>

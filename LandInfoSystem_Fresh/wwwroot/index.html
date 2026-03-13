@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<style id="cg-hide-cursor">*{cursor:none!important}</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Land Information System - Professional Edition</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- LEAFLET CSS FOR HEATMAP -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+  <!-- STYLES -->
+  <link rel="stylesheet" href="css/style.css?v=12">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <!-- FONTAWESOME FOR ICONS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="container">
+    <div class="logo">Land Pro System</div>
+    <ul class="nav-links">
+      <li><a href="#" onclick="navigateTo('home'); return false;">Home</a></li>
+      <li id="navProperties"><a href="#" onclick="navigateTo('properties'); return false;">Properties</a></li>
+      <li><a href="#" onclick="navigateTo('map-section'); return false;">Map</a></li>
+      <li id="navAI" style="display:none;"><a href="price-prediction.html">AI Prediction</a></li>
+      <li id="navLoan" style="display:none;"><a href="loan.html">Loan</a></li>
+      <li id="navDashboard" style="display:none;"><a href="#" onclick="navigateTo('dashboard'); return false;">Dashboard</a></li>
+      <li id="navAdmin" style="display:none;"><a href="#" onclick="navigateTo('admin'); return false;">Admin</a></li>
+      <li id="navProfile" style="display:none;"><a href="#" onclick="navigateTo('profile'); return false;">Account Profile</a></li>
+      <li id="navAuth"><a href="#" onclick="navigateTo('auth'); return false;">Login</a></li>
+      <li id="navLogout" style="display:none;">
+        <span id="userGreeting"></span>
+        <a href="#" onclick="handleLogout(); return false;" class="logout-btn">Logout</a>
+      </li>
+    </ul>
+    <button class="hamburger" onclick="toggleMenu()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <button class="close-menu" onclick="toggleMenu()">✕</button>
+  <h3 style="color: var(--accent-gold); margin-bottom: 20px; font-size: 1.8rem; letter-spacing: 2px;">NAVIGATION</h3>
+  <a href="#" onclick="navigateTo('home'); toggleMenu(); return false;">Home</a>
+  <a href="#" onclick="navigateTo('properties'); toggleMenu(); return false;">Properties</a>
+  <a href="#" onclick="navigateTo('map-section'); toggleMenu(); return false;">Map</a>
+  <a href="price-prediction.html" id="mobNavAI" style="display:none;">AI Prediction</a>
+  <a href="loan.html" id="mobNavLoan" style="display:none;">Loan</a>
+  
+  <div id="mobileAuthLinks" style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px; width: 80%; display: flex; flex-direction: column; align-items: center; gap: 20px;">
+    <a href="#" id="mobNavDashboard" style="display:none;" onclick="navigateTo('dashboard'); toggleMobileMenu(); return false;">Dashboard</a>
+    <a href="#" id="mobNavProfile" style="display:none;" onclick="navigateTo('profile'); toggleMobileMenu(); return false;">Account Profile</a>
+    <a href="#" id="mobNavAuth" onclick="navigateTo('auth'); toggleMobileMenu(); return false;">Login</a>
+    <div id="mobNavLogout" style="display:none; text-align: center;">
+      <span id="mobUserGreeting" style="display: block; color: var(--accent-gold); margin-bottom: 10px; font-size: 1.1rem;"></span>
+      <a href="#" onclick="handleLogout(); toggleMobileMenu(); return false;" class="logout-btn">Logout</a>
+    </div>
+  </div>
+</div>
+
+<!-- HOME SECTION -->
+<section id="home" class="section active page-transition">
+  <div id="canvas-container"></div>
+  <div class="hero-overlay">
+    <div class="hero-content">
+      <h1>Premium Land Information System</h1>
+      <p>Buy, Sell & Manage Properties with Advanced 3D Visualization</p>
+      <p class="subtitle">Professional Platform for Real Estate Transactions</p>
+      <div class="hero-buttons">
+        <button class="btn-primary" onclick="navigateTo('properties'); return false;">Browse Properties</button>
+        <button id="heroSignIn" class="btn-secondary" onclick="navigateTo('auth'); return false;">Sign In</button>
+        <button id="heroDash" class="btn-secondary" onclick="navigateTo('dashboard'); return false;" style="display:none;">My Dashboard</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROPERTIES SECTION -->
+<section id="properties" class="section page-transition">
+  <div class="container">
+    <h2>Property Listings</h2>
+    
+    <div class="search-bar">
+      <input type="text" id="searchCity" placeholder="Search by city...">
+      <input type="number" id="minPrice" placeholder="Min Price">
+      <input type="number" id="maxPrice" placeholder="Max Price">
+      <select id="propertyType">
+        <option value="">All Types</option>
+        <option value="Residential">Residential</option>
+        <option value="Commercial">Commercial</option>
+        <option value="Industrial">Industrial</option>
+      </select>
+      <button onclick="searchProperties(); return false;" class="btn-search">Search</button>
+      <button onclick="resetSearch(); return false;" class="btn-reset">Reset</button>
+    </div>
+
+    <div id="properties-container" class="properties-grid">
+      <div class="loading">Loading properties...</div>
+    </div>
+  </div>
+</section>
+
+<!-- AUTH SECTION -->
+<section id="auth" class="section page-transition">
+  <div class="auth-wrapper">
+    <div class="auth-container">
+      
+      <div class="auth-box" id="loginBox">
+        <h2>Login</h2>
+        <form id="loginForm">
+            <div id="loginStep1">
+            <div class="form-group glass-input">
+              <label><i class="fas fa-user"></i> Username</label>
+              <input type="text" id="loginUsername" placeholder="Enter your username" required>
+            </div>
+            
+            <div class="form-group glass-input">
+              <label><i class="fas fa-lock"></i> Password</label>
+              <input type="password" id="loginPassword" placeholder="Enter your password" required>
+            </div>
+            
+            <button type="submit" class="auth-btn btn-primary" id="loginBtn">Login <i class="fas fa-sign-in-alt"></i></button>
+          </div>
+          <p class="auth-switch">Don't have an account? <a href="#" onclick="toggleAuthMode('register'); return false;">Register here</a></p>
+        </form>
+      </div>
+
+      <div class="auth-box" id="registerBox" style="display:none;">
+        <h2>Register</h2>
+        <form id="registerForm">
+          <!-- Step 1: User Details -->
+          <div id="regStep1">
+            <input type="text" id="regUsername" placeholder="Username" required>
+            <input type="email" id="regEmail" placeholder="Email" required>
+            <input type="password" id="regPassword" placeholder="Password" required>
+            <input type="text" id="regFirstName" placeholder="First Name">
+            <input type="text" id="regLastName" placeholder="Last Name">
+            <input type="text" id="regPhone" placeholder="Phone Number (10 digits)" required>
+            <input type="text" id="regAddress" placeholder="Address">
+            <select id="regUserType" required onchange="toggleAdminSecret()">
+              <option value="">Select Account Type</option>
+              <option value="Buyer">Buyer</option>
+              <option value="Seller">Seller</option>
+              <option value="Admin">Admin</option>
+            </select>
+            <input type="password" id="regAdminSecret" placeholder="Admin Secret Code" style="display:none; margin-top:10px; border-color:var(--accent-gold);">
+            <button type="submit" class="btn-primary" id="btnFinalRegister" style="margin-top:15px; width: 100%;">Register</button>
+          </div>
+        </form>
+        <p style="margin-top: 15px;">Have an account? <a href="#" onclick="toggleAuthMode('login'); return false;">Login</a></p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- SELLER DASHBOARD -->
+<section id="dashboard" class="section page-transition">
+  <div class="container">
+    <div class="dashboard-header">
+      <h2>Dashboard</h2>
+      <div id="dashboardRole" class="role-badge"></div>
+    </div>
+
+    <!-- SELLER TAB -->
+    <div id="sellerDash" class="dashboard-section" style="display:none;">
+      <h3>My Properties</h3>
+      <button class="btn-primary" onclick="togglePropertyForm(); return false;">+ Add Property</button>
+
+      <div id="propertyForm" class="property-form" style="display:none;">
+        <h4>Post New Property</h4>
+        <form id="addPropForm">
+          <div class="form-row">
+            <input type="text" id="propTitle" placeholder="Title" required>
+            <input type="number" id="propArea" placeholder="Area (sq ft)" required>
+          </div>
+          <div class="form-row">
+            <input type="number" id="propPrice" placeholder="Price" required>
+            <input type="text" id="propLocation" placeholder="Location" required>
+          </div>
+          <div class="form-row">
+            <input type="text" id="propCity" placeholder="City" required>
+            <input type="text" id="propState" placeholder="State" required>
+          </div>
+          <div class="form-row">
+            <input type="text" id="propPinCode" placeholder="Pin Code" required>
+            <select id="propType" required>
+              <option value="">Property Type</option>
+              <option value="Residential">Residential</option>
+              <option value="Commercial">Commercial</option>
+              <option value="Industrial">Industrial</option>
+            </select>
+          </div>
+          <textarea id="propDesc" placeholder="Description" rows="3"></textarea>
+          
+          <div class="document-upload-section" style="margin-top: 15px; border: 1px dashed var(--border); padding: 15px; border-radius: var(--radius-sm);">
+            <h5 style="margin-bottom: 10px; color: var(--accent-gold);">Land Documents (Max 5MB each)</h5>
+            <div class="form-row">
+               <div class="form-group" style="flex:1;">
+                 <label style="font-size: 11px;">Sale Deed (PDF/JPG)</label>
+                 <input type="file" id="docSaleDeed" accept=".pdf,.jpg,.jpeg,.png">
+               </div>
+               <div class="form-group" style="flex:1;">
+                 <label style="font-size: 11px;">Patta Document (PDF/JPG)</label>
+                 <input type="file" id="docPatta" accept=".pdf,.jpg,.jpeg,.png">
+               </div>
+            </div>
+            <div class="form-row">
+               <div class="form-group" style="flex:1;">
+                 <label style="font-size: 11px;">Ownership Proof (PDF/JPG)</label>
+                 <input type="file" id="docOwnership" accept=".pdf,.jpg,.jpeg,.png">
+               </div>
+               <div class="form-group" style="flex:1;">
+                 <label style="font-size: 11px;">EC Certificate (PDF/JPG)</label>
+                 <input type="file" id="docEC" accept=".pdf,.jpg,.jpeg,.png">
+               </div>
+            </div>
+          </div>
+          <div style="display: flex; gap: 10px;">
+            <button type="submit" class="btn-primary">Post</button>
+            <button type="button" class="btn-reset" onclick="togglePropertyForm(); return false;">Cancel</button>
+          </div>
+        </form>
+      </div>
+
+      <div id="sellerProperties" class="properties-grid">
+        <div class="loading">Loading your properties...</div>
+      </div>
+
+      <hr style="margin: 40px 0; border: none; border-top: 1px solid var(--border);">
+      
+      <h3>Received Inquiries</h3>
+      <div id="messagesList" class="messages-list">
+        <div class="loading">Loading messages...</div>
+      </div>
+    </div>
+
+    <!-- BUYER TAB -->
+    <div id="buyerDash" class="dashboard-section" style="display:none;">
+      <h3>My Wishlist & Inquiries</h3>
+      <div class="buyer-stats">
+        <div class="stat-card">
+          <h4>0</h4>
+          <p>Saved Properties</p>
+        </div>
+        <div class="stat-card">
+          <h4>0</h4>
+          <p>Active Inquiries</p>
+        </div>
+        <div class="stat-card">
+          <h4>0</h4>
+          <p>Viewed Properties</p>
+        </div>
+      </div>
+      <div id="buyerWishlist" class="properties-grid">
+        <div class="loading">No saved properties yet</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ADMIN SECTION -->
+<section id="admin" class="section page-transition" style="display:none;">
+  <div class="container">
+    <h2>Admin Panel</h2>
+    
+    <div class="admin-tabs">
+      <button class="tab-btn active" onclick="showAdminTab('users'); return false;">Users</button>
+      <button class="tab-btn" onclick="showAdminTab('properties'); return false;">Properties</button>
+      <button class="tab-btn" onclick="showAdminTab('verifications'); return false;">Verification</button>
+      <button class="tab-btn" onclick="showAdminTab('analytics'); return false;">Analytics</button>
+    </div>
+
+    <div id="adminUsers" class="admin-tab active">
+      <h3>All Users</h3>
+      <div id="usersList" class="admin-table">
+        <div class="loading">Loading users...</div>
+      </div>
+    </div>
+
+    <div id="adminProperties" class="admin-tab" style="display:none;">
+      <h3>All Properties</h3>
+      <div id="propertiesList" class="admin-table">
+        <div class="loading">Loading properties...</div>
+      </div>
+    </div>
+
+    <div id="adminVerifications" class="admin-tab" style="display:none;">
+      <h3>Document Verification Requests</h3>
+      <div id="verificationList" class="admin-table">
+        <div class="loading">Loading verification requests...</div>
+      </div>
+    </div>
+
+    <div id="adminAnalytics" class="admin-tab" style="display:none;">
+      <h3>Analytics</h3>
+      <div class="analytics-grid">
+        <div class="stat-card">
+          <h4 id="totalUsers">0</h4>
+          <p>Total Users</p>
+        </div>
+        <div class="stat-card">
+          <h4 id="totalProperties">0</h4>
+          <p>Total Properties</p>
+        </div>
+        <div class="stat-card">
+          <h4 id="activeListings">0</h4>
+          <p>Active Listings</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROFILE SECTION -->
+<section id="profile" class="section page-transition" style="display:none;">
+  <div class="container">
+    <div class="profile-card">
+      <div class="profile-header">
+        <div class="profile-avatar"><i class="fas fa-user-circle"></i></div>
+        <h2 id="profName">User Profile</h2>
+        <p id="profTypeBadge" class="role-badge">Buyer</p>
+      </div>
+      <div class="profile-body">
+        <div class="info-group">
+          <label>Username</label>
+          <p id="profUsername">-</p>
+        </div>
+        <div class="info-group">
+          <label>Email Address</label>
+          <p id="profEmail">-</p>
+        </div>
+        <div class="info-group">
+          <label>Account Type</label>
+          <p id="profType">-</p>
+        </div>
+      </div>
+      <div class="profile-footer" style="display:flex; gap:10px;">
+        <button class="btn-secondary" onclick="show('dashboard')" style="flex:1;">Back to Dashboard</button>
+        <button class="btn-primary" onclick="logout()" style="flex:1;">Sign Out</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MESSAGE -->
+<div id="message" class="message"></div>
+
+<!-- MAP SECTION -->
+<section id="map-section" class="section page-transition">
+  <div class="container">
+    <h2>Property Map</h2>
+    <p class="map-subtitle">Explore properties on the map across India</p>
+    <div class="map-wrapper" style="position: relative;">
+      <!-- Leaflet map container -->
+      <div id="propertyMap" style="width: 100%; height: 100%; background: #0a0f1e; border-radius: inherit;"></div>
+      <!-- Heatmap Toggle Overlay -->
+      <div style="position: absolute; top: 20px; right: 20px; z-index: 1000;">
+        <button id="toggleHeatmapBtn" class="btn-primary" style="padding: 8px 16px; font-size: 14px; box-shadow: 0 4px 15px rgba(0,0,0,0.5);"> Toggle Heatmap</button>
+      </div>
+    </div>
+    <div class="map-info-bar">
+      <div class="map-info-card">
+        <div class="map-icon"></div>
+        <h4>Browse by Location</h4>
+        <p>Explore residential, commercial and industrial plots across all states</p>
+      </div>
+      <div class="map-info-card">
+        <div class="map-icon"></div>
+        <h4>Pin Properties</h4>
+        <p>Each listing is geo-tagged so you can find properties near you</p>
+      </div>
+      <div class="map-info-card">
+        <div class="map-icon"></div>
+        <h4>Filter by Area</h4>
+        <p>Zoom into specific cities and filter by price range and property type</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ADVANCED CHATBOT -->
+<div class="chatbot-container">
+  <button class="chatbot-toggle" onclick="toggleChat(); return false;" style="display: flex; align-items: center; justify-content: center; font-size: 24px;">
+    <i class="fas fa-comment-dots"></i>
+  </button>
+  <div class="chatbot-window" id="chatWindow" style="display:none;">
+    <div class="chatbot-header">
+      <h3> AI Assistant Pro</h3>
+      <div class="header-btns">
+        <button class="icon-btn" onclick="clearChat(); return false;" title="Clear Chat"><i class="fas fa-trash-alt"></i></button>
+        <button class="close-btn" onclick="toggleChat(); return false;">✕</button>
+      </div>
+    </div>
+    <div id="chatBox" class="chat-messages"></div>
+    <div class="chat-input-area">
+      <button id="voiceBtn" class="voice-btn" onclick="startVoiceRecognition(); return false;" title="Voice Typing"><i class="fas fa-microphone"></i></button>
+      <input type="text" id="chatInput" placeholder="Ask about properties, process, etc..." required>
+      <button onclick="sendChat(); return false;" class="send-btn">Send</button>
+    </div>
+  </div>
+</div>
+
+<!-- LOADING SCREEN -->
+<div id="loadingScreen" class="loading-screen">
+  <div class="spinner"></div>
+  <p>Loading...</p>
+</div>
+
+<!-- SCRIPTS (order matters: app.js defines API_URL + helpers, then others) -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+<script src="js/app.js?v=13"></script>
+<script src="js/auth.js?v=13"></script>
+<script src="js/properties.js?v=13"></script>
+
+<style>
+.hamburger { display: flex; flex-direction: column; justify-content: center; gap: 5px; background: none; border: none; cursor: pointer; padding: 6px; margin-left: auto; }
+.hamburger span { display: block; width: 24px; height: 2px; background: var(--accent-gold); border-radius: 2px; transition: all 0.3s; }
+.mobile-menu { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10,15,30,0.97); backdrop-filter: blur(12px); z-index: 1050; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+.mobile-menu.open { display: flex; }
+.mobile-menu a { color: #f1f5f9; font-size: 1.5rem; font-weight: 700; text-decoration: none; letter-spacing: 1px; transition: color 0.2s; }
+.mobile-menu a:hover { color: var(--accent-gold); }
+.mobile-menu .close-menu { position: absolute; top: 28px; right: 28px; background: none; border: none; color: var(--accent-gold); font-size: 2rem; cursor: pointer; }
+</style>
+<script>
+function toggleMenu() {
+  document.getElementById('mobileMenu').classList.toggle('open');
+}
+</script>
+<!-- CONTACT SELLER MODAL -->
+<div id="contactModal" class="modal-overlay" style="display:none;">
+  <div class="modal-content contact-modal">
+    <button class="close-modal" onclick="closeContactModal()">&times;</button>
+    <div class="modal-header">
+      <h2>Contact Seller</h2>
+      <p id="modalPropTitle" style="color:var(--accent-gold); font-weight:700;"></p>
+    </div>
+    <div class="modal-body">
+      <div class="property-snippet">
+        <p><i class="fas fa-map-marker-alt"></i> <span id="modalPropLocation"></span></p>
+        <p><i class="fas fa-tag"></i> <span id="modalPropPrice"></span></p>
+      </div>
+
+      <div class="seller-snippet">
+        <p><strong>Seller:</strong> <span id="modalSellerName"></span></p>
+        <div class="modal-buttons row">
+          <a id="modalCallBtn" href="#" class="btn-secondary" style="flex:1; text-align:center;"><i
+              class="fas fa-phone"></i> Call Seller</a>
+          <p id="modalSellerEmail" style="font-size:0.85rem; color:var(--text-muted); padding:5px;"></p>
+        </div>
+      </div>
+
+      <form id="contactForm" onsubmit="submitContactForm(event)">
+        <div class="form-group">
+          <label>Your Name</label>
+          <input type="text" id="contactName" placeholder="Full Name" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" id="contactEmail" placeholder="Email" required>
+          </div>
+          <div class="form-group">
+            <label>Phone Number</label>
+            <input type="text" id="contactPhone" placeholder="Phone" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Message</label>
+          <textarea id="contactMessage"
+            rows="4">Hello, I am interested in your land property. Please contact me with more details.</textarea>
+        </div>
+        <button type="submit" class="btn-primary" style="width:100%; margin-top:10px;">Send Message</button>
+      </form>
+    </div>
+  </div>
+</div>
+<script src="js/cursor-effect.js"></script>
+</body>
+</html>
