@@ -1,0 +1,20 @@
+services:
+  # .NET Backend
+  - type: web
+    name: land-info-backend
+    env: docker
+    plan: free
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+    healthCheckPath: /swagger/index.html
+
+  # AI Price Predictor (Python)
+  - type: web
+    name: land-price-ai
+    env: python
+    buildCommand: "cd ai-model && pip install -r requirements.txt && python price_predictor.py" # Or using uvicorn
+    startCommand: "cd ai-model && uvicorn price_predictor:app --host 0.0.0.0 --port 10000"
+    envVars:
+      - key: PORT
+        value: 10000
